@@ -11,9 +11,9 @@ import it.polito.tdp.meteo.db.MeteoDAO;
 public class Model {
 
 	private final static int COST = 100;
-	private final static int NUMERO_GIORNI_CITTA_CONSECUTIVI_MIN = 3;
-	private final static int NUMERO_GIORNI_CITTA_MAX = 6;
-	private final static int NUMERO_GIORNI_TOTALI = 15;
+	private final static int NUMERO_GIORNI_CITTA_CONSECUTIVI_MIN = 2;
+	private final static int NUMERO_GIORNI_CITTA_MAX = 4;
+	private final static int NUMERO_GIORNI_TOTALI = 6;
 	private MeteoDAO dao;
 	private List<Citta> citta;
 	private List<SimpleCity> soluzione;
@@ -35,15 +35,14 @@ public class Model {
 
 	public String trovaSequenza(int mese) {
 		String s = "";
-		best = 1000000000000000000000000.0;
+		best = 100000000000000000.0;
 		soluzione = null;
-		
 		List<SimpleCity> parziale = new ArrayList<SimpleCity>();
 		
 		for (Citta c: citta)
 			c.setRilevamenti(dao.getAllRilevamentiLocalitaMese(mese, c.getNome()).subList(0, 14));
 		
-		ricorsione(parziale, 0, mese);
+		ricorsione(parziale, 0);
 		
 		if (soluzione != null) {
 			for (SimpleCity sc: soluzione)
@@ -54,14 +53,12 @@ public class Model {
 		return s;
 	}
 	
-	private void ricorsione(List<SimpleCity> parziale, int L, int mese) {
-		
-		if (punteggioSoluzione(parziale) > best)
-			return ;
+	private void ricorsione(List<SimpleCity> parziale, int L) {
 		
 		if (L == NUMERO_GIORNI_TOTALI) {
-			if (controllaParziale(parziale) & punteggioSoluzione(parziale) < best) {
-				best = punteggioSoluzione(parziale);
+			Double punteggio = punteggioSoluzione(parziale);
+			if (punteggio < best) {
+				best = punteggio;
 				soluzione = new ArrayList<SimpleCity>(parziale);
 			}
 			return ; 
@@ -69,9 +66,10 @@ public class Model {
 		
 		for (Citta c: citta)
 			for (Rilevamento r: c.getRilevamenti()) {
-				parziale.add(new SimpleCity(c.getNome(), r.getUmidita()));
+				parziale.add(new SimpleCity(r.getLocalita(), r.getUmidita()));
 				
-				ricorsione(parziale, L+1, mese);
+				if (controllaParziale(parziale))
+					ricorsione(parziale, L+1);
 				
 				parziale.remove(parziale.size()-1);
 			}
@@ -79,6 +77,7 @@ public class Model {
 	}
 
 	private Double punteggioSoluzione(List<SimpleCity> soluzioneCandidata) {
+		
 		double score = 0.0;
 		int count = 0;
 		
@@ -93,6 +92,21 @@ public class Model {
 	}
 
 	private boolean controllaParziale(List<SimpleCity> parziale) {
+		
+		if (parziale.size() > 1) {
+			SimpleCity attuale = parziale.get(0);
+			int c = 0;
+			for (SimpleCity sc: parziale) {
+				
+				if (attuale.equals(sc))
+					c++;
+				else if (c >= NUMERO_GIORNI_CITTA_CONSECUTIVI_MIN) {
+					c = 1;
+					attuale = sc;
+				} else
+					return false;
+				
+			}}
 			
 		for (Citta c: citta) {
 			int count = 0;
@@ -100,22 +114,10 @@ public class Model {
 				if (c.getNome().compareTo(sc.getNome())==0)
 					count++;
 			}
-			if (count > NUMERO_GIORNI_CITTA_MAX || count < 1)
+			if (count > NUMERO_GIORNI_CITTA_MAX)
 				return false;
-		}
-		
-		SimpleCity attuale = parziale.get(0);
-		int c = 0;
-		for (SimpleCity sc: parziale) {
-			
-			if (attuale.equals(sc))
-				c++;
-			else if (c >= NUMERO_GIORNI_CITTA_CONSECUTIVI_MIN) {
-				c = 1;
-				attuale = sc;
-			} else
+			if (parziale.size() == NUMERO_GIORNI_TOTALI & count < 1)
 				return false;
-			
 		}
 		
 		return true;

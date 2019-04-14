@@ -19,7 +19,7 @@ public class MeteoDAO {
 		List<Citta> localita = new ArrayList<Citta>();
 
 		try {
-			Connection conn = DBConnect.getInstance().getConnection();
+			Connection conn = DBConnect.getConnection();
 			PreparedStatement st = conn.prepareStatement(sql);
 			ResultSet rs = st.executeQuery();
 
@@ -44,7 +44,7 @@ public class MeteoDAO {
 		List<Rilevamento> rilevamenti = new ArrayList<Rilevamento>();
 
 		try {
-			Connection conn = DBConnect.getInstance().getConnection();
+			Connection conn = DBConnect.getConnection();
 			PreparedStatement st = conn.prepareStatement(sql);
 			ResultSet rs = st.executeQuery();
 
@@ -64,12 +64,12 @@ public class MeteoDAO {
 
 	public List<Rilevamento> getAllRilevamentiLocalitaMese(int mese, String localita) {
 		
-		final String sql = "SELECT Localita, Data, Umidita FROM situazione WHERE Data LIKE ? AND Localita = ?";
+		final String sql = "SELECT Localita, Data, Umidita FROM situazione WHERE Data LIKE ? AND Localita = ? ORDER BY data ASC";
 
 		List<Rilevamento> rilevamenti = new ArrayList<Rilevamento>();
 
 		try {
-			Connection conn = DBConnect.getInstance().getConnection();
+			Connection conn = DBConnect.getConnection();
 			PreparedStatement st = conn.prepareStatement(sql);
 			
 			if (mese < 10)
@@ -100,7 +100,7 @@ public class MeteoDAO {
 		final String sql = "SELECT AVG(umidita) AS media FROM situazione WHERE DATA LIKE ? AND localita = ?";
 
 		try {
-			Connection conn = DBConnect.getInstance().getConnection();
+			Connection conn = DBConnect.getConnection();
 			PreparedStatement st = conn.prepareStatement(sql);
 			
 			if (mese < 10)

@@ -11,9 +11,9 @@ import it.polito.tdp.meteo.db.MeteoDAO;
 public class Model {
 
 	private final static int COST = 100;
-	private final static int NUMERO_GIORNI_CITTA_CONSECUTIVI_MIN = 2;
-	private final static int NUMERO_GIORNI_CITTA_MAX = 4;
-	private final static int NUMERO_GIORNI_TOTALI = 6;
+	private final static int NUMERO_GIORNI_CITTA_CONSECUTIVI_MIN = 3;
+	private final static int NUMERO_GIORNI_CITTA_MAX = 6;
+	private final static int NUMERO_GIORNI_TOTALI = 15;
 	private MeteoDAO dao;
 	private List<Citta> citta;
 	private List<SimpleCity> soluzione;
@@ -35,12 +35,12 @@ public class Model {
 
 	public String trovaSequenza(int mese) {
 		String s = "";
-		best = 100000000000000000.0;
+		best = 0.0;
 		soluzione = null;
 		List<SimpleCity> parziale = new ArrayList<SimpleCity>();
 		
 		for (Citta c: citta)
-			c.setRilevamenti(dao.getAllRilevamentiLocalitaMese(mese, c.getNome()).subList(0, 14));
+			c.setRilevamenti(dao.getAllRilevamentiLocalitaMese(mese, c.getNome()));
 		
 		ricorsione(parziale, 0);
 		
@@ -57,22 +57,22 @@ public class Model {
 		
 		if (L == NUMERO_GIORNI_TOTALI) {
 			Double punteggio = punteggioSoluzione(parziale);
-			if (punteggio < best) {
+			if (punteggio < best || best == 0.0) {
 				best = punteggio;
 				soluzione = new ArrayList<SimpleCity>(parziale);
 			}
 			return ; 
 		}
 		
-		for (Citta c: citta)
-			for (Rilevamento r: c.getRilevamenti()) {
-				parziale.add(new SimpleCity(r.getLocalita(), r.getUmidita()));
+		for (Citta c: citta) {
+			Rilevamento r = c.getRilevamenti().get(L);
+			parziale.add(new SimpleCity(r.getLocalita(), r.getUmidita()));
 				
-				if (controllaParziale(parziale))
-					ricorsione(parziale, L+1);
+			if (controllaParziale(parziale))
+				ricorsione(parziale, L+1);
 				
-				parziale.remove(parziale.size()-1);
-			}
+			parziale.remove(parziale.size()-1);
+		}
 		
 	}
 

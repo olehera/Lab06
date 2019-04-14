@@ -6,32 +6,21 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 public class DBConnect {
+	
+	private static final String jdbcURL = "jdbc:mysql://localhost/meteo?serverTimezone=UTC&user=root&password=sascia";
 
-	static private final String jdbcUrl = "jdbc:mysql://localhost/meteo?serverTimezone=UTC&user=root&password=sascia";
-	static private DBConnect instance = null;
-
-	private DBConnect() {
-		instance = this;
-	}
-
-	public static DBConnect getInstance() {
-		if (instance == null)
-			return new DBConnect();
-		else {
-			return instance;
-		}
-	}
-
-	public Connection getConnection() {
+	public static Connection getConnection() {
+		
 		try {
-
-			Connection conn = DriverManager.getConnection(jdbcUrl);
+			Connection conn = DriverManager.getConnection(jdbcURL); 
+			
 			return conn;
-
-		} catch (SQLException e) {
-			e.printStackTrace();
-			throw new RuntimeException("Cannot get connection " + jdbcUrl, e);
-		}
+			
+			} catch(SQLException ex) {
+				ex.printStackTrace();
+			}
+		
+		return null;
 	}
 
 }

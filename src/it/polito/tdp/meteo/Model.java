@@ -45,12 +45,12 @@ public class Model {
 		ricorsione(parziale, 0);
 		
 		if (soluzione != null) {
-			for (SimpleCity sc: soluzione)
-				s += sc.getNome()+"\n"; 
+			for (int i=1; i<=soluzione.size(); i++)
+				s += i+".  "+soluzione.get(i-1).getNome()+"\n"; 
 		} else
 			s = "Non è stata trovata nessuna soluzione";
 
-		return s;
+		return s+"Punteggio = "+punteggioSoluzione(soluzione);
 	}
 	
 	private void ricorsione(List<SimpleCity> parziale, int L) {
